@@ -1,0 +1,985 @@
+[
+  {
+    "id": 1,
+    "question": "30\\% \\text{ de } 80",
+    "type": "numeric",
+    "answer": "24",
+    "acceptedAnswers": [
+      "24"
+    ],
+    "difficulty": 1,
+    "topic": "arithmetic",
+    "active": true
+  },
+  {
+    "id": 2,
+    "question": "\\text{Résoudre } 7-3x=2.",
+    "type": "math_input",
+    "answer": "\\frac{5}{3}",
+    "acceptedAnswers": [
+      "\\frac{5}{3}",
+      "5/3"
+    ],
+    "difficulty": 2,
+    "topic": "equations",
+    "active": true
+  },
+  {
+    "id": 3,
+    "question": "\\text{Résoudre } (1-x)(x-3)\\geq 0.",
+    "type": "qcm",
+    "choices": [
+      "[1,3]",
+      "]-\\infty,1]\\cup[3,+\\infty[",
+      "]1,3[",
+      "]-\\infty,1[\\cup]3,+\\infty[",
+      "\\{1,3\\}",
+      "\\varnothing"
+    ],
+    "answer": "[1,3]",
+    "difficulty": 4,
+    "topic": "inequalities",
+    "active": true
+  },
+  {
+    "id": 4,
+    "question": "\\text{Calculer } \\cos(7\\pi).",
+    "type": "numeric",
+    "answer": "-1",
+    "acceptedAnswers": [
+      "-1"
+    ],
+    "difficulty": 2,
+    "topic": "trigonometry",
+    "active": true
+  },
+  {
+    "id": 5,
+    "question": "f:x\\mapsto \\frac{1}{2x-1}.\\ \\text{Donner } f'(x).",
+    "type": "qcm",
+    "choices": [
+      "-\\frac{2}{(2x-1)^2}",
+      "\\frac{2}{(2x-1)^2}",
+      "-\\frac{1}{(2x-1)^2}",
+      "\\frac{1}{2x-1}",
+      "\\frac{2}{2x-1}",
+      "-\\frac{2}{2x-1}"
+    ],
+    "answer": "-\\frac{2}{(2x-1)^2}",
+    "difficulty": 4,
+    "topic": "derivatives",
+    "active": true
+  },
+  {
+    "id": 6,
+    "question": "\\text{Calculer } \\left[\\ln(\\sqrt{e})\\right]^2.",
+    "type": "math_input",
+    "answer": "\\frac{1}{4}",
+    "acceptedAnswers": [
+      "\\frac{1}{4}",
+      "1/4",
+      "0.25"
+    ],
+    "difficulty": 3,
+    "topic": "logarithms",
+    "active": true
+  },
+  {
+    "id": 7,
+    "question": "\\text{Forme exponentielle de } -1+i.",
+    "type": "qcm",
+    "choices": [
+      "\\sqrt{2}e^{i\\frac{3\\pi}{4}}",
+      "\\sqrt{2}e^{i\\frac{\\pi}{4}}",
+      "2e^{i\\frac{3\\pi}{4}}",
+      "\\sqrt{2}e^{-i\\frac{\\pi}{4}}",
+      "\\sqrt{2}e^{-i\\frac{3\\pi}{4}}",
+      "2e^{i\\frac{\\pi}{4}}"
+    ],
+    "answer": "\\sqrt{2}e^{i\\frac{3\\pi}{4}}",
+    "difficulty": 4,
+    "topic": "complex_numbers",
+    "active": true
+  },
+  {
+    "id": 8,
+    "question": "\\text{Calculer } \\sum_{k=0}^{100}\\binom{100}{k}.",
+    "type": "math_input",
+    "answer": "2^{100}",
+    "acceptedAnswers": [
+      "2^{100}",
+      "2^100"
+    ],
+    "difficulty": 4,
+    "topic": "binomial_coefficients",
+    "active": true
+  },
+  {
+    "id": 9,
+    "question": "A\\in\\mathcal{M}_{3,5}(\\mathbb{R}) \\text{ et } B\\in\\mathcal{M}_{5,4}(\\mathbb{R}).\\ \\text{Taille de la matrice } AB ?",
+    "type": "qcm",
+    "choices": [
+      "\\mathcal{M}_{3,4}(\\mathbb{R})",
+      "\\mathcal{M}_{5,5}(\\mathbb{R})",
+      "\\mathcal{M}_{4,3}(\\mathbb{R})",
+      "\\mathcal{M}_{3,5}(\\mathbb{R})",
+      "\\mathcal{M}_{5,4}(\\mathbb{R})",
+      "\\text{Produit impossible}"
+    ],
+    "answer": "\\mathcal{M}_{3,4}(\\mathbb{R})",
+    "difficulty": 3,
+    "topic": "matrices",
+    "active": true
+  },
+  {
+    "id": 10,
+    "question": "100\\ \\text{millions}=10^{\\ldots}",
+    "type": "numeric",
+    "answer": "8",
+    "acceptedAnswers": [
+      "8"
+    ],
+    "difficulty": 2,
+    "topic": "powers",
+    "active": true
+  },
+  {
+    "id": 11,
+    "question": "\\text{Calculer } \\arcsin\\left(\\sin\\left(\\frac{2\\pi}{3}\\right)\\right).",
+    "type": "math_input",
+    "answer": "\\frac{\\pi}{3}",
+    "acceptedAnswers": [
+      "\\frac{\\pi}{3}",
+      "pi/3",
+      "π/3"
+    ],
+    "difficulty": 5,
+    "topic": "trigonometry",
+    "active": true
+  },
+  {
+    "id": 12,
+    "question": "\\text{Calculer } \\binom{6}{4}.",
+    "type": "numeric",
+    "answer": "15",
+    "acceptedAnswers": [
+      "15"
+    ],
+    "difficulty": 2,
+    "topic": "combinatorics",
+    "active": true
+  },
+  {
+    "id": 13,
+    "question": "\\left\\lfloor \\sqrt{51} \\right\\rfloor = \\ldots",
+    "type": "numeric",
+    "answer": "7",
+    "acceptedAnswers": [
+      "7"
+    ],
+    "difficulty": 2,
+    "topic": "integer_part",
+    "active": true
+  },
+  {
+    "id": 14,
+    "question": "\\text{Exprimer en fonction de } n : \\sum_{k=0}^{n}3.",
+    "type": "math_input",
+    "answer": "3(n+1)",
+    "acceptedAnswers": [
+      "3(n+1)",
+      "3n+3",
+      "3n + 3"
+    ],
+    "difficulty": 3,
+    "topic": "sums",
+    "active": true
+  },
+  {
+    "id": 15,
+    "question": "\\text{Calculer } (\\sqrt{2})^5-4\\sqrt{2}.",
+    "type": "numeric",
+    "answer": "0",
+    "acceptedAnswers": [
+      "0"
+    ],
+    "difficulty": 3,
+    "topic": "powers_roots",
+    "active": true
+  },
+  {
+    "id": 16,
+    "question": "\\text{Simplifier } 2^{n+1}-2^n.",
+    "type": "math_input",
+    "answer": "2^n",
+    "acceptedAnswers": [
+      "2^n",
+      "2^{n}"
+    ],
+    "difficulty": 3,
+    "topic": "powers",
+    "active": true
+  },
+  {
+    "id": 17,
+    "question": "\\text{Calculer } \\prod_{k=1}^{20}\\frac{k+1}{k}.",
+    "type": "numeric",
+    "answer": "21",
+    "acceptedAnswers": [
+      "21"
+    ],
+    "difficulty": 4,
+    "topic": "products",
+    "active": true
+  },
+  {
+    "id": 18,
+    "question": "A=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}.\\ \\text{Déterminer } A^2.",
+    "type": "qcm",
+    "choices": [
+      "\\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}",
+      "\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}",
+      "\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}",
+      "\\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}",
+      "\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}",
+      "\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}"
+    ],
+    "answer": "\\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}",
+    "difficulty": 4,
+    "topic": "matrices",
+    "active": true
+  },
+  {
+    "id": 19,
+    "question": "\\text{Donner une solution particulière de l'équation différentielle } y''+y'=2.",
+    "type": "qcm",
+    "choices": [
+      "f_p:x\\mapsto 2x",
+      "f_p:x\\mapsto e^x",
+      "f_p:x\\mapsto 2",
+      "f_p:x\\mapsto x^2",
+      "f_p:x\\mapsto -2x",
+      "f_p:x\\mapsto 2e^x"
+    ],
+    "answer": "f_p:x\\mapsto 2x",
+    "difficulty": 5,
+    "topic": "differential_equations",
+    "active": true
+  },
+  {
+    "id": 20,
+    "question": "\\lim_{n\\to +\\infty}\\frac{2n^2+1}{1-n^2}",
+    "type": "numeric",
+    "answer": "-2",
+    "acceptedAnswers": [
+      "-2"
+    ],
+    "difficulty": 3,
+    "topic": "limits",
+    "active": true
+  },
+  {
+    "id": 21,
+    "question": "\\text{Résoudre dans } \\mathbb{C} : z^2=-9.",
+    "type": "qcm",
+    "choices": [
+      "z=3i \\text{ ou } z=-3i",
+      "z=3 \\text{ ou } z=-3",
+      "z=9i \\text{ ou } z=-9i",
+      "z=i \\text{ ou } z=-i",
+      "z=\\sqrt{3}i \\text{ ou } z=-\\sqrt{3}i",
+      "\\text{Aucune solution dans } \\mathbb{C}"
+    ],
+    "answer": "z=3i \\text{ ou } z=-3i",
+    "difficulty": 3,
+    "topic": "complex_numbers",
+    "active": true
+  },
+  {
+    "id": 22,
+    "question": "|x-3|\\leq 0{,}1 \\Longleftrightarrow x\\in\\ldots",
+    "type": "qcm",
+    "choices": [
+      "[2{,}9;3{,}1]",
+      "[2;4]",
+      "]-\\infty;2{,}9]\\cup[3{,}1;+\\infty[",
+      "[3;3{,}1]",
+      "[2{,}9;3]",
+      "\\varnothing"
+    ],
+    "answer": "[2{,}9;3{,}1]",
+    "difficulty": 3,
+    "topic": "absolute_value",
+    "active": true
+  },
+  {
+    "id": 23,
+    "question": "f:]0,+\\infty[\\to\\mathbb{R},\\ x\\mapsto \\frac{\\ln(x)}{x}.\\ \\text{Une primitive } F \\text{ de } f \\text{ sur } ]0,+\\infty[ \\text{ est :}",
+    "type": "qcm",
+    "choices": [
+      "F:x\\mapsto \\frac{1}{2}(\\ln x)^2",
+      "F:x\\mapsto \\ln(x)^2",
+      "F:x\\mapsto \\frac{1}{x}",
+      "F:x\\mapsto \\ln(x)",
+      "F:x\\mapsto x\\ln(x)",
+      "F:x\\mapsto -\\frac{\\ln(x)}{x}"
+    ],
+    "answer": "F:x\\mapsto \\frac{1}{2}(\\ln x)^2",
+    "difficulty": 5,
+    "topic": "primitives",
+    "active": true
+  },
+  {
+    "id": 24,
+    "question": "A^2-3A=I_3 \\Longleftrightarrow A\\times(\\ldots)=I_3.",
+    "type": "qcm",
+    "choices": [
+      "A-3I_3",
+      "A+3I_3",
+      "A^2-3I_3",
+      "3I_3-A",
+      "A^{-1}",
+      "A^2+3A"
+    ],
+    "answer": "A-3I_3",
+    "difficulty": 5,
+    "topic": "matrices",
+    "active": true
+  },
+  {
+    "id": 25,
+    "question": "\\text{Signe de } 2+\\ln(x) \\text{ sur } ]0,+\\infty[.",
+    "type": "sign_table",
+    "answer": "\\text{Négatif sur } ]0,e^{-2}[,\\ 0 \\text{ en } e^{-2},\\ \\text{positif sur } ]e^{-2},+\\infty[.",
+    "difficulty": 5,
+    "topic": "logarithms",
+    "active": false,
+    "reason": "sign_table_display_to_implement_later"
+  },
+  {
+    "id": 26,
+    "question": "\\text{Dans un repère du plan, } A(0,-1) \\text{ et } B(2,2).\\ C(8,\\ldots)\\in(AB).\\ \\text{Compléter.}",
+    "type": "numeric",
+    "answer": "11",
+    "acceptedAnswers": [
+      "11"
+    ],
+    "difficulty": 4,
+    "topic": "analytic_geometry",
+    "active": true
+  },
+  {
+    "id": 27,
+    "question": "u:x\\mapsto x+1 \\text{ et } v:x\\mapsto \\frac{1}{x}.\\ \\text{Compléter } u\\circ v:x\\mapsto \\ldots",
+    "type": "qcm",
+    "choices": [
+      "\\frac{1}{x}+1",
+      "\\frac{1}{x+1}",
+      "x+\\frac{1}{x}",
+      "\\frac{x+1}{x+1}",
+      "x+2",
+      "\\frac{1}{x}-1"
+    ],
+    "answer": "\\frac{1}{x}+1",
+    "difficulty": 3,
+    "topic": "functions_composition",
+    "active": true
+  },
+  {
+    "id": 28,
+    "question": "f:x\\mapsto x^2-1 \\text{ est une bijection de } [0,+\\infty[ \\text{ dans } [-1,+\\infty[.\\ \\text{Donner } f^{-1}(x).",
+    "type": "qcm",
+    "choices": [
+      "\\sqrt{x+1}",
+      "\\sqrt{x-1}",
+      "x^2+1",
+      "-\\sqrt{x+1}",
+      "\\frac{1}{x^2-1}",
+      "\\sqrt{x}+1"
+    ],
+    "answer": "\\sqrt{x+1}",
+    "difficulty": 4,
+    "topic": "inverse_functions",
+    "active": true
+  },
+  {
+    "id": 29,
+    "question": "\\lim_{\\substack{x\\to e\\\\x>e}}\\frac{3}{1-\\ln(x)}",
+    "type": "qcm",
+    "choices": [
+      "-\\infty",
+      "+\\infty",
+      "0",
+      "3",
+      "-3",
+      "1"
+    ],
+    "answer": "-\\infty",
+    "difficulty": 5,
+    "topic": "limits",
+    "active": true
+  },
+  {
+    "id": 30,
+    "question": "\\text{Exprimer en fonction de } n\\in\\mathbb{N}^* : \\sum_{i=1}^{n}\\sum_{j=1}^{n}ij.",
+    "type": "qcm",
+    "choices": [
+      "\\left(\\frac{n(n+1)}{2}\\right)^2",
+      "\\frac{n(n+1)}{2}",
+      "n^2",
+      "\\frac{n^2(n+1)}{2}",
+      "\\frac{n(n+1)(2n+1)}{6}",
+      "n(n+1)"
+    ],
+    "answer": "\\left(\\frac{n(n+1)}{2}\\right)^2",
+    "difficulty": 6,
+    "topic": "sums",
+    "active": true
+  },
+  {
+    "id": 31,
+    "question": "60\\% \\text{ de } 80",
+    "type": "numeric",
+    "answer": "48",
+    "acceptedAnswers": [
+      "48"
+    ],
+    "difficulty": 1,
+    "topic": "arithmetic",
+    "active": true
+  },
+  {
+    "id": 32,
+    "question": "\\text{Résoudre } 2x+3=5x-1.",
+    "type": "math_input",
+    "answer": "\\frac{4}{3}",
+    "acceptedAnswers": [
+      "\\frac{4}{3}",
+      "4/3",
+      "1.3333333333"
+    ],
+    "difficulty": 2,
+    "topic": "equations",
+    "active": true
+  },
+  {
+    "id": 33,
+    "question": "f:x\\mapsto \\ln(3x-1).\\ \\text{Donner } f'(x).",
+    "type": "qcm",
+    "choices": [
+      "\\frac{3}{3x-1}",
+      "\\frac{1}{3x-1}",
+      "\\frac{3}{x-1}",
+      "\\ln(3)",
+      "\\frac{1}{x}",
+      "3\\ln(3x-1)"
+    ],
+    "answer": "\\frac{3}{3x-1}",
+    "difficulty": 3,
+    "topic": "derivatives",
+    "active": true
+  },
+  {
+    "id": 34,
+    "question": "\\text{Simplifier } 1+\\ln\\left(\\frac{1}{e}\\right).",
+    "type": "numeric",
+    "answer": "0",
+    "acceptedAnswers": [
+      "0"
+    ],
+    "difficulty": 2,
+    "topic": "logarithms",
+    "active": true
+  },
+  {
+    "id": 35,
+    "question": "\\text{Calculer } \\cos\\left(-\\frac{\\pi}{3}\\right).",
+    "type": "math_input",
+    "answer": "\\frac{1}{2}",
+    "acceptedAnswers": [
+      "\\frac{1}{2}",
+      "1/2",
+      "0.5"
+    ],
+    "difficulty": 2,
+    "topic": "trigonometry",
+    "active": true
+  },
+  {
+    "id": 36,
+    "question": "\\text{Forme exponentielle de } -2i.",
+    "type": "qcm",
+    "choices": [
+      "2e^{-i\\frac{\\pi}{2}}",
+      "2e^{i\\frac{\\pi}{2}}",
+      "-2e^{i\\pi}",
+      "2e^{i\\pi}",
+      "-2e^{-i\\frac{\\pi}{2}}",
+      "2e^{-i\\pi}"
+    ],
+    "answer": "2e^{-i\\frac{\\pi}{2}}",
+    "difficulty": 4,
+    "topic": "complex_numbers",
+    "active": true
+  },
+  {
+    "id": 37,
+    "question": "A=\\begin{pmatrix}2&0&0\\\\0&3&0\\\\0&0&-1\\end{pmatrix}.\\ \\text{Donner } A^{-1}.",
+    "type": "qcm",
+    "choices": [
+      "\\begin{pmatrix}\\frac12&0&0\\\\0&\\frac13&0\\\\0&0&-1\\end{pmatrix}",
+      "\\begin{pmatrix}2&0&0\\\\0&3&0\\\\0&0&-1\\end{pmatrix}",
+      "\\begin{pmatrix}\\frac12&0&0\\\\0&\\frac13&0\\\\0&0&1\\end{pmatrix}",
+      "\\begin{pmatrix}-2&0&0\\\\0&-3&0\\\\0&0&1\\end{pmatrix}",
+      "\\begin{pmatrix}2&0&0\\\\0&\\frac13&0\\\\0&0&-1\\end{pmatrix}",
+      "\\begin{pmatrix}\\frac12&0&0\\\\0&3&0\\\\0&0&1\\end{pmatrix}"
+    ],
+    "answer": "\\begin{pmatrix}\\frac12&0&0\\\\0&\\frac13&0\\\\0&0&-1\\end{pmatrix}",
+    "difficulty": 4,
+    "topic": "matrices",
+    "active": true
+  },
+  {
+    "id": 38,
+    "question": "\\text{Calculer } \\sum_{k=0}^{200}\\binom{200}{k}.",
+    "type": "math_input",
+    "answer": "2^{200}",
+    "acceptedAnswers": [
+      "2^{200}",
+      "2^200"
+    ],
+    "difficulty": 4,
+    "topic": "binomial_coefficients",
+    "active": true
+  },
+  {
+    "id": 39,
+    "question": "\\operatorname{rg}((1,1,1),(2,2,2),(0,1,0))",
+    "type": "numeric",
+    "answer": "2",
+    "acceptedAnswers": [
+      "2"
+    ],
+    "difficulty": 4,
+    "topic": "linear_algebra",
+    "active": true
+  },
+  {
+    "id": 40,
+    "question": "100\\ \\text{milliards}=10^{\\ldots}",
+    "type": "numeric",
+    "answer": "11",
+    "acceptedAnswers": [
+      "11"
+    ],
+    "difficulty": 2,
+    "topic": "powers",
+    "active": true
+  },
+  {
+    "id": 41,
+    "question": "\\text{Simplifier } e^{2\\ln(3)}.",
+    "type": "numeric",
+    "answer": "9",
+    "acceptedAnswers": [
+      "9"
+    ],
+    "difficulty": 3,
+    "topic": "exponentials_logarithms",
+    "active": true
+  },
+  {
+    "id": 42,
+    "question": "\\text{Calculer } \\binom{10}{9}.",
+    "type": "numeric",
+    "answer": "10",
+    "acceptedAnswers": [
+      "10"
+    ],
+    "difficulty": 1,
+    "topic": "combinatorics",
+    "active": true
+  },
+  {
+    "id": 43,
+    "question": "n\\in\\mathbb{N}^*.\\ \\text{Degré du polynôme } (X-1)^n-X^n.",
+    "type": "math_input",
+    "answer": "n-1",
+    "acceptedAnswers": [
+      "n-1",
+      "n - 1"
+    ],
+    "difficulty": 5,
+    "topic": "polynomials",
+    "active": true
+  },
+  {
+    "id": 44,
+    "question": "A\\in\\mathcal{M}_3(\\mathbb{R}),\\ A^3-3A=I_3.\\ \\text{Donner } A^{-1}.",
+    "type": "qcm",
+    "choices": [
+      "A^2-3I_3",
+      "A^3-3I_3",
+      "3I_3-A^2",
+      "A^2+3I_3",
+      "A-3I_3",
+      "I_3-3A"
+    ],
+    "answer": "A^2-3I_3",
+    "difficulty": 6,
+    "topic": "matrices",
+    "active": true
+  },
+  {
+    "id": 45,
+    "question": "\\text{Résoudre } y'+3y=0.",
+    "type": "qcm",
+    "choices": [
+      "y=Ce^{-3x}",
+      "y=Ce^{3x}",
+      "y=-3Ce^x",
+      "y=C-3x",
+      "y=3Ce^{-x}",
+      "y=Cx^{-3}"
+    ],
+    "answer": "y=Ce^{-3x}",
+    "difficulty": 4,
+    "topic": "differential_equations",
+    "active": true
+  },
+  {
+    "id": 46,
+    "question": "\\lim_{n\\to +\\infty}\\frac{\\sqrt{n}}{\\ln(n)}",
+    "type": "qcm",
+    "choices": [
+      "+\\infty",
+      "0",
+      "1",
+      "-\\infty",
+      "\\frac{1}{2}",
+      "\\ln(2)"
+    ],
+    "answer": "+\\infty",
+    "difficulty": 4,
+    "topic": "limits",
+    "active": true
+  },
+  {
+    "id": 47,
+    "question": "n^2\\left(e^{\\frac{1}{n}}-1\\right)\\sim_{+\\infty} \\ldots",
+    "type": "math_input",
+    "answer": "n",
+    "acceptedAnswers": [
+      "n"
+    ],
+    "difficulty": 5,
+    "topic": "equivalents",
+    "active": true
+  },
+  {
+    "id": 48,
+    "question": "\\frac{x^2}{1+x^2}=\\ldots-\\frac{1}{1+x^2}",
+    "type": "numeric",
+    "answer": "1",
+    "acceptedAnswers": [
+      "1"
+    ],
+    "difficulty": 2,
+    "topic": "equations",
+    "active": true
+  },
+  {
+    "id": 49,
+    "question": "\\sum_{k=0}^{19}5",
+    "type": "numeric",
+    "answer": "100",
+    "acceptedAnswers": [
+      "100"
+    ],
+    "difficulty": 2,
+    "topic": "sums",
+    "active": true
+  },
+  {
+    "id": 50,
+    "question": "A=\\begin{pmatrix}2&1\\\\-1&1\\end{pmatrix}.\\ \\det(A)=\\ldots",
+    "type": "numeric",
+    "answer": "3",
+    "acceptedAnswers": [
+      "3"
+    ],
+    "difficulty": 3,
+    "topic": "determinants",
+    "active": true
+  },
+  {
+    "id": 51,
+    "question": "\\text{Une urne contient } b \\text{ boules blanches et } 3 \\text{ boules noires. On tire une boule au hasard. Quelle est la probabilité de tirer une boule blanche ?}",
+    "type": "qcm",
+    "choices": [
+      "\\frac{b}{b+3}",
+      "\\frac{3}{b+3}",
+      "\\frac{b}{3}",
+      "\\frac{3}{b}",
+      "\\frac{b+3}{b}",
+      "\\frac{b}{b+1}"
+    ],
+    "answer": "\\frac{b}{b+3}",
+    "difficulty": 3,
+    "topic": "probability",
+    "active": true
+  },
+  {
+    "id": 52,
+    "question": "\\text{Calculer } \\int_{-2}^{2}\\sin(t)\\,dt.",
+    "type": "numeric",
+    "answer": "0",
+    "acceptedAnswers": [
+      "0"
+    ],
+    "difficulty": 3,
+    "topic": "integrals",
+    "active": true
+  },
+  {
+    "id": 53,
+    "question": "\\text{Quelle est l'allure de la courbe de } f(x)=|\\ln(x)| ?",
+    "type": "graph_qcm",
+    "choices": [
+      {
+        "label": "A",
+        "graph": {
+          "renderer": "mafs",
+          "expression": "abs(log(x))",
+          "domain": [
+            0.05,
+            5
+          ],
+          "viewBox": {
+            "x": [
+              0,
+              5
+            ],
+            "y": [
+              -0.5,
+              4
+            ]
+          }
+        }
+      },
+      {
+        "label": "B",
+        "graph": {
+          "renderer": "mafs",
+          "expression": "log(x)",
+          "domain": [
+            0.05,
+            5
+          ],
+          "viewBox": {
+            "x": [
+              0,
+              5
+            ],
+            "y": [
+              -4,
+              3
+            ]
+          }
+        }
+      },
+      {
+        "label": "C",
+        "graph": {
+          "renderer": "mafs",
+          "expression": "-abs(log(x))",
+          "domain": [
+            0.05,
+            5
+          ],
+          "viewBox": {
+            "x": [
+              0,
+              5
+            ],
+            "y": [
+              -4,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "label": "D",
+        "graph": {
+          "renderer": "mafs",
+          "expression": "1/(1+x*x)",
+          "domain": [
+            0,
+            5
+          ],
+          "viewBox": {
+            "x": [
+              0,
+              5
+            ],
+            "y": [
+              -0.5,
+              2
+            ]
+          }
+        }
+      }
+    ],
+    "answer": "A",
+    "difficulty": 6,
+    "topic": "functions_graphs",
+    "active": true
+  },
+  {
+    "id": 54,
+    "question": "\\text{Une primitive de } x\\mapsto \\frac{1}{1+x^2} \\text{ sur } \\mathbb{R} \\text{ est :}",
+    "type": "qcm",
+    "choices": [
+      "\\arctan(x)",
+      "\\ln(1+x^2)",
+      "\\frac{1}{2}\\ln(1+x^2)",
+      "-\\frac{1}{1+x^2}",
+      "\\tan(x)",
+      "\\frac{x}{1+x^2}"
+    ],
+    "answer": "\\arctan(x)",
+    "difficulty": 3,
+    "topic": "primitives",
+    "active": true
+  },
+  {
+    "id": 55,
+    "question": "\\text{Vrai ou faux : la famille } ((1,5),(2,\\pi),(\\sqrt{3},-1)) \\text{ est libre.}",
+    "type": "true_false",
+    "choices": [
+      "\\text{Vrai}",
+      "\\text{Faux}"
+    ],
+    "answer": "\\text{Faux}",
+    "difficulty": 4,
+    "topic": "linear_algebra",
+    "active": true
+  },
+  {
+    "id": 56,
+    "question": "\\text{À partir du graphique, donner l'équation de la droite } (AB).",
+    "type": "qcm",
+    "questionGraph": {
+      "renderer": "mafs",
+      "viewBox": {
+        "x": [
+          -2,
+          5
+        ],
+        "y": [
+          -2.5,
+          2.5
+        ]
+      },
+      "objects": [
+        {
+          "type": "line",
+          "expression": "(2/3)*x-1",
+          "domain": [
+            -2,
+            5
+          ]
+        },
+        {
+          "type": "point",
+          "label": "A",
+          "coordinates": [
+            0,
+            -1
+          ]
+        },
+        {
+          "type": "point",
+          "label": "B",
+          "coordinates": [
+            3,
+            1
+          ]
+        }
+      ]
+    },
+    "choices": [
+      "y=\\frac{2}{3}x-1",
+      "y=\\frac{3}{2}x-1",
+      "y=\\frac{2}{3}x+1",
+      "y=-\\frac{2}{3}x-1",
+      "y=x-1",
+      "y=\\frac{1}{2}x-1"
+    ],
+    "answer": "y=\\frac{2}{3}x-1",
+    "difficulty": 5,
+    "topic": "analytic_geometry",
+    "active": true
+  },
+  {
+    "id": 57,
+    "question": "f\\in\\mathcal{L}(\\mathbb{R}^4) \\text{ telle que } \\operatorname{rg}(f)=3.\\ \\dim(\\ker(f))=\\ldots",
+    "type": "numeric",
+    "answer": "1",
+    "acceptedAnswers": [
+      "1"
+    ],
+    "difficulty": 4,
+    "topic": "linear_algebra",
+    "active": true
+  },
+  {
+    "id": 58,
+    "question": "\\arctan(-1)",
+    "type": "math_input",
+    "answer": "-\\frac{\\pi}{4}",
+    "acceptedAnswers": [
+      "-\\frac{\\pi}{4}",
+      "-pi/4",
+      "-π/4"
+    ],
+    "difficulty": 3,
+    "topic": "trigonometry",
+    "active": true
+  },
+  {
+    "id": 59,
+    "question": "f:x\\mapsto \\int_0^x e^t\\,dt.\\ \\text{Donner } f'(x).",
+    "type": "qcm",
+    "choices": [
+      "e^x",
+      "e^t",
+      "e^x-1",
+      "\\int_0^x e^t\\,dt",
+      "xe^x",
+      "1"
+    ],
+    "answer": "e^x",
+    "difficulty": 3,
+    "topic": "integrals_derivatives",
+    "active": true
+  },
+  {
+    "id": 60,
+    "question": "f\\in\\mathcal{L}(\\mathbb{R}^3),\\ (1,2,3)\\in\\ker\\left(f-3\\operatorname{Id}_{\\mathbb{R}^3}\\right).\\ \\text{Donner } f((1,2,3)).",
+    "type": "qcm",
+    "choices": [
+      "(3,6,9)",
+      "(1,2,3)",
+      "(0,0,0)",
+      "3",
+      "(-3,-6,-9)",
+      "(6,3,1)"
+    ],
+    "answer": "(3,6,9)",
+    "difficulty": 5,
+    "topic": "linear_algebra",
+    "active": true
+  }
+]
