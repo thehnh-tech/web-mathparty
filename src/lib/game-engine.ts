@@ -5,6 +5,7 @@ import {
 } from "./questions";
 import { ChapterId, chapterById } from "./chapters";
 import { schedulePersist } from "./persistence";
+import { publishRoomState } from "@/lib/ably";
 
 const MAX_LIVES = 3;
 const MAX_SLOTS = 8;
@@ -45,6 +46,7 @@ global._bombFuseTimers = fuseTimers;
 function emit(code: string) {
   const state = rooms.get(code);
   if (!state) return;
+  void publishRoomState(code, state).catch(() => {});
   const set = listeners.get(code);
   if (!set) return;
   for (const l of set) {
@@ -251,6 +253,7 @@ export function createRoom(opts: {
     history: [],
   };
   rooms.set(code, state);
+  emit(code);
   return state;
 }
 
