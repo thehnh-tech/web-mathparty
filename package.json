@@ -17,7 +17,7 @@
     "katex": "^0.16.45",
     "mongodb": "^7.2.0",
     "mongoose": "^9.6.1",
-    "next": "15.3.2",
+    "next": "15.5.18",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "resend": "^6.12.2"
@@ -29,7 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.2",
+    "eslint-config-next": "15.5.18",
     "tailwindcss": "^4.1.5",
     "typescript": "^5"
   }
