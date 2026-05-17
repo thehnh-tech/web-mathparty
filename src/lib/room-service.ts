@@ -2,7 +2,7 @@ import "server-only";
 
 import * as engine from "@/lib/game-engine";
 import { isValidChapterId } from "@/lib/chapters";
-import { AnswerPayload, RoomType } from "@/lib/game-types";
+import { AnswerPayload, RoomState, RoomType } from "@/lib/game-types";
 import { RequestActor } from "@/lib/actor";
 
 const CREATE_LIMIT = 10;
@@ -59,10 +59,10 @@ export function createRoomForActor(
 export async function joinRoomForActor(
   actor: RequestActor,
   code: string
-): Promise<{ ok: true } | { error: string }> {
+): Promise<{ ok: true; state: RoomState } | { error: string }> {
   const result = await engine.joinRoom(code.toUpperCase(), actorToPlayer(actor));
   if ("error" in result) return { error: result.error };
-  return { ok: true };
+  return { ok: true, state: result.state };
 }
 
 export async function leaveRoomForActor(

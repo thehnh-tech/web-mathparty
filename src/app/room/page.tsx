@@ -24,7 +24,7 @@ function RoomContent() {
   const session = authClient.useSession();
   const myId = session.data?.user?.id ?? null;
 
-  const { state, status } = useRoomEvents(code || null);
+  const { state, status, applyState } = useRoomEvents(code || null);
 
   const [error, setError] = useState<string | null>(null);
   const joinedRef = useRef(false);
@@ -46,9 +46,15 @@ function RoomContent() {
       if ("error" in res) {
         setError(res.error);
         joinedRef.current = false;
+        return;
       }
+      // Don't wait for the Ably broadcast — if the publish path is slow or
+      // misconfigured the joiner would otherwise stay stuck on the pre-join
+      // snapshot. Applying the server-confirmed state immediately makes the
+      // local view consistent with the server in either case.
+      applyState(res.state);
     });
-  }, [code, myId, state, status]);
+  }, [applyState, code, myId, state, status]);
 
   // Note: we do NOT leave on unmount. Presence is tracked server-side via the
   // SSE connection — closing it triggers a grace timer (~12s) that removes the

@@ -12,7 +12,7 @@ function pickFirst(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
-function safeVerifyUrl(raw: string): string | null {
+function parseTarget(raw: string): URL | null {
   if (!raw) return null;
   let parsed: URL;
   try {
@@ -23,7 +23,6 @@ function safeVerifyUrl(raw: string): string | null {
   // Only allow our own auth verify endpoint to avoid open-redirect.
   const base = process.env.BETTER_AUTH_URL;
   if (!base) {
-    // In dev there's no BETTER_AUTH_URL; accept localhost only.
     if (parsed.hostname !== "localhost" && parsed.hostname !== "127.0.0.1") {
       return null;
     }
@@ -37,12 +36,18 @@ function safeVerifyUrl(raw: string): string | null {
     if (parsed.host !== allowed.host) return null;
   }
   if (!parsed.pathname.startsWith("/api/auth/")) return null;
-  return parsed.toString();
+  return parsed;
 }
 
 export default async function AuthConfirmPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const target = safeVerifyUrl(pickFirst(params.to));
+  const target = parseTarget(pickFirst(params.to));
+  // GET forms always strip the action's query string and replace it with
+  // their form fields, so each query param has to be a hidden input or
+  // the magic-link `token` would be lost en route to /api/auth/...
+  const hiddenFields: Array<[string, string]> = target
+    ? Array.from(target.searchParams.entries())
+    : [];
 
   return (
     <main
@@ -87,13 +92,10 @@ export default async function AuthConfirmPage({ searchParams }: PageProps) {
       </p>
 
       {target ? (
-        // GET form so the browser navigates with all the original query
-        // params; bots that crawl <a href> or fire HEAD requests won't trip
-        // a real form submission.
-        <form
-          action={new URL(target).pathname + new URL(target).search}
-          method="GET"
-        >
+        <form action={target.pathname} method="GET">
+          {hiddenFields.map(([key, value]) => (
+            <input key={key} type="hidden" name={key} value={value} />
+          ))}
           <button
             type="submit"
             style={{

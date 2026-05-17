@@ -37,6 +37,13 @@ export function useRoomEvents(code: string | null) {
   const [state, setState] = useState<RoomState | null>(null);
   const [status, setStatus] = useState<Status>("connecting");
 
+  // Exposed so callers (e.g. the room page after a successful join) can apply
+  // the new state directly instead of waiting on the Ably round-trip.
+  const applyState = (next: RoomState) => {
+    setState(next);
+    setStatus("open");
+  };
+
   useEffect(() => {
     if (!code) return;
     const normalizedCode = code.toUpperCase();
@@ -149,5 +156,5 @@ export function useRoomEvents(code: string | null) {
     };
   }, [code]);
 
-  return { state, status };
+  return { state, status, applyState };
 }

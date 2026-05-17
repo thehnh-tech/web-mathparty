@@ -10,6 +10,7 @@ import {
   submitChoiceForActor,
   submitTextForActor,
 } from "@/lib/room-service";
+import type { RoomState } from "@/lib/game-types";
 
 export async function createRoomAction(
   chapterId: string,
@@ -26,7 +27,7 @@ export async function createRoomAction(
 
 export async function joinRoomAction(
   code: string
-): Promise<{ ok: true } | { error: string }> {
+): Promise<{ ok: true; state: RoomState } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
     return await joinRoomForActor(actor, code);
