@@ -15,6 +15,13 @@ const ACTIVE_POLL_MS = 500;
 const IDLE_POLL_MS = 1000;
 const TRANSITION_BUFFER_MS = 80;
 
+// Minimum time a reveal must remain on-screen locally so the player can
+// actually read the answer/explosion feedback. Matches the server's reveal
+// window — if the server lazily-advances and returns a fresher state in
+// the same poll, we hold the next state in a queue until this window has
+// elapsed locally so the transition stays smooth.
+const LOCAL_REVEAL_HOLD_MS = 1800;
+
 interface RoomStatePayload {
   type: "state";
   state: RoomState;
@@ -59,25 +66,95 @@ function stateSignature(state: RoomState): string {
   });
 }
 
+// Monotonic ordering: a state with a larger stamp strictly supersedes a
+// smaller one. Lets us drop a stale poll response that arrives after we've
+// already moved on. Reveal frames sort between adjacent rounds.
+function monoStamp(state: RoomState): number {
+  return state.round * 2 + (state.lastAnswer ? 1 : 0);
+}
+
+// Does applying `next` after `cur` look like a "transition" — a new question
+// or moving past a reveal? Those are the changes we may need to hold off on
+// to keep the reveal visible long enough for the player.
+function isTransition(cur: RoomState, next: RoomState): boolean {
+  if (!cur.lastAnswer) return false;
+  if (!next.lastAnswer) return true;
+  const curQid = cur.currentQuestion?.id ?? null;
+  const nextQid = next.currentQuestion?.id ?? null;
+  return curQid !== nextQid;
+}
+
 export function useRoomEvents(code: string | null) {
   const [state, setState] = useState<RoomState | null>(null);
   const [status, setStatus] = useState<Status>("connecting");
   const signatureRef = useRef<string | null>(null);
   const closedRef = useRef(false);
   const stateRef = useRef<RoomState | null>(null);
+  const stampRef = useRef<number>(-1);
+  const holdUntilRef = useRef<number>(0);
+  const pendingRef = useRef<RoomState | null>(null);
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Apply a state from anywhere (Ably push, /state poll, post-action response)
-  // through the same gate so we only re-render on meaningful changes and we
-  // never overwrite a fresh snapshot with a stale one in flight.
+  // through the same gate so we (a) drop stale updates that lost a race,
+  // (b) hold transitions until the local reveal window has played out, and
+  // (c) only re-render on meaningful changes.
   const applyState = (next: RoomState) => {
+    if (closedRef.current) return;
+
+    const stamp = monoStamp(next);
+    if (stamp < stampRef.current) {
+      // A poll that started before a newer state landed — drop it so we
+      // don't go backwards through a reveal we already left.
+      return;
+    }
+
+    const now = Date.now();
+    const cur = stateRef.current;
+
+    if (cur && isTransition(cur, next) && holdUntilRef.current > now) {
+      // Defer applying the post-reveal state until the reveal has had its
+      // full local window. Replace any older buffered candidate.
+      pendingRef.current = next;
+      if (!flushTimerRef.current) {
+        flushTimerRef.current = setTimeout(() => {
+          flushTimerRef.current = null;
+          const buffered = pendingRef.current;
+          pendingRef.current = null;
+          if (buffered) doApply(buffered);
+        }, Math.max(0, holdUntilRef.current - now) + 30);
+      }
+      return;
+    }
+
+    doApply(next);
+  };
+
+  function doApply(next: RoomState) {
     if (closedRef.current) return;
     const sig = stateSignature(next);
     if (sig === signatureRef.current) return;
     signatureRef.current = sig;
+
+    const cur = stateRef.current;
+    const enteringReveal = !!(
+      next.lastAnswer &&
+      (!cur?.lastAnswer || cur.lastAnswer.ts !== next.lastAnswer.ts)
+    );
+    if (enteringReveal) {
+      // Start the local reveal hold using the wall clock, not the server's
+      // revealUntilTs — that way clock skew between server and client can't
+      // shorten the reveal animation.
+      holdUntilRef.current = Date.now() + LOCAL_REVEAL_HOLD_MS;
+    } else if (!next.lastAnswer) {
+      holdUntilRef.current = 0;
+    }
+
     stateRef.current = next;
+    stampRef.current = monoStamp(next);
     setState(next);
     setStatus("open");
-  };
+  }
 
   useEffect(() => {
     if (!code) return;
@@ -85,6 +162,13 @@ export function useRoomEvents(code: string | null) {
     closedRef.current = false;
     signatureRef.current = null;
     stateRef.current = null;
+    stampRef.current = -1;
+    holdUntilRef.current = 0;
+    pendingRef.current = null;
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
     setStatus("connecting");
     setState(null);
 
@@ -228,6 +312,11 @@ export function useRoomEvents(code: string | null) {
       closedRef.current = true;
       abortController.abort();
       if (pollTimer) clearTimeout(pollTimer);
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current);
+        flushTimerRef.current = null;
+      }
+      pendingRef.current = null;
       void channel?.presence.leave().catch(() => {});
       channel?.unsubscribe(ROOM_EVENT_NAME, handleMessage);
       realtime?.close();

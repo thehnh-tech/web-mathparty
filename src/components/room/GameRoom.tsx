@@ -60,7 +60,7 @@ export default function GameRoom({
 
       {q && (
         <div className="game-question-panel">
-          <QuestionCard latex={q.question} topic={q.topic} />
+          <QuestionCard key={q.id} latex={q.question} topic={q.topic} />
         </div>
       )}
 

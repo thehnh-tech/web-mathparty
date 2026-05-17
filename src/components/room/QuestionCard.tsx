@@ -24,8 +24,17 @@ export default function QuestionCard({ latex, topic }: Props) {
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
+        // Animate every remount (we key the card on q.id upstream so a new
+        // question gets a fresh fade-in instead of swapping text in place).
+        animation: "question-pop 280ms ease-out both",
       }}
     >
+      <style>{`
+        @keyframes question-pop {
+          0%   { opacity: 0; transform: translateY(8px) scale(0.985); }
+          100% { opacity: 1; transform: translateY(0)  scale(1); }
+        }
+      `}</style>
       {/* Pink tape */}
       <div
         style={{
