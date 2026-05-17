@@ -2,9 +2,9 @@
 
 import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { useRoomEvents } from "@/lib/use-room-events";
 import {
+  getMyIdAction,
   joinRoomAction,
   leaveRoomAction,
   startGameAction,
@@ -21,8 +21,26 @@ function RoomContent() {
   const params = useSearchParams();
   const code = (params.get("code") ?? "").toUpperCase();
 
-  const session = authClient.useSession();
-  const myId = session.data?.user?.id ?? null;
+  // Use the server-resolved actor id so guests (who only have the
+  // bombatique_guest cookie, not a Better Auth session) are recognized
+  // too — otherwise myId stays null and auto-join never fires.
+  const [myId, setMyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyIdAction()
+      .then((res) => {
+        if (cancelled) return;
+        if ("id" in res) setMyId(res.id);
+      })
+      .catch(() => {
+        // No actor — leave myId null; the room will still display in
+        // read-only mode for whoever hits this page without a session.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const { state, status, applyState } = useRoomEvents(code || null);
 
