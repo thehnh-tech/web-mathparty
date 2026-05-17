@@ -6,6 +6,12 @@ import {
 import { ChapterId, chapterById } from "./chapters";
 import { schedulePersist } from "./persistence";
 import { publishRoomState } from "@/lib/ably";
+import {
+  deleteRoomSnapshot,
+  listPublicRoomSnapshots,
+  loadRoomSnapshot,
+  saveRoomSnapshot,
+} from "./room-store";
 
 const MAX_LIVES = 3;
 const MAX_SLOTS = 8;
@@ -45,8 +51,13 @@ global._bombFuseTimers = fuseTimers;
 
 function emit(code: string) {
   const state = rooms.get(code);
-  if (!state) return;
+  if (!state) {
+    // Room was just deleted — propagate that to the durable store too.
+    void deleteRoomSnapshot(code).catch(() => {});
+    return;
+  }
   void publishRoomState(code, state).catch(() => {});
+  void saveRoomSnapshot(state).catch(() => {});
   const set = listeners.get(code);
   if (!set) return;
   for (const l of set) {
@@ -56,6 +67,19 @@ function emit(code: string) {
       // listener error — ignore, the SSE side handles cleanup on cancel
     }
   }
+}
+
+// Look up a room across instances. Prefers the in-memory cache; falls back to
+// the durable snapshot persisted on every emit. This keeps room state usable
+// even when Vercel routes the request to a Lambda that has not seen the room
+// yet (the original in-memory-only design lost the room in that case).
+export async function ensureRoom(code: string): Promise<RoomState | undefined> {
+  const cached = rooms.get(code);
+  if (cached) return cached;
+  const loaded = await loadRoomSnapshot(code);
+  if (!loaded) return undefined;
+  rooms.set(code, loaded);
+  return loaded;
 }
 
 export function subscribe(
@@ -123,7 +147,7 @@ export function markAbsent(code: string, userId: string): void {
     absenceTimers.delete(key);
     const stillPresent = (presence.get(code)?.get(userId) ?? 0) > 0;
     if (stillPresent) return;
-    leaveRoom(code, userId);
+    void leaveRoom(code, userId);
   }, ABSENCE_GRACE_MS);
   absenceTimers.set(key, t);
 }
@@ -257,7 +281,7 @@ export function createRoom(opts: {
   return state;
 }
 
-export function listPublicRooms(): Array<{
+export interface PublicRoomSummary {
   code: string;
   subject: string;
   chapterId: string;
@@ -265,37 +289,44 @@ export function listPublicRooms(): Array<{
   status: string;
   players: number;
   maxSlots: number;
-}> {
-  const out: Array<{
-    code: string;
-    subject: string;
-    chapterId: string;
-    hostHandle: string;
-    status: string;
-    players: number;
-    maxSlots: number;
-  }> = [];
-  for (const r of rooms.values()) {
-    if (r.roomType !== "public") continue;
-    if (r.status === "finished") continue;
-    out.push({
-      code: r.code,
-      subject: r.subject,
-      chapterId: r.chapterId,
-      hostHandle: r.hostHandle,
-      status: r.status,
-      players: r.players.length,
-      maxSlots: r.maxSlots,
-    });
-  }
-  return out;
 }
 
-export function joinRoom(
+function summarize(r: RoomState): PublicRoomSummary {
+  return {
+    code: r.code,
+    subject: r.subject,
+    chapterId: r.chapterId,
+    hostHandle: r.hostHandle,
+    status: r.status,
+    players: r.players.length,
+    maxSlots: r.maxSlots,
+  };
+}
+
+export async function listPublicRooms(): Promise<PublicRoomSummary[]> {
+  const byCode = new Map<string, PublicRoomSummary>();
+  // Start with the durable list so we see rooms created on other instances.
+  const persisted = await listPublicRoomSnapshots();
+  for (const r of persisted) {
+    if (r.roomType !== "public" || r.status === "finished") continue;
+    byCode.set(r.code, summarize(r));
+  }
+  // Overlay in-memory state so locally-fresh changes win.
+  for (const r of rooms.values()) {
+    if (r.roomType !== "public" || r.status === "finished") {
+      byCode.delete(r.code);
+      continue;
+    }
+    byCode.set(r.code, summarize(r));
+  }
+  return Array.from(byCode.values());
+}
+
+export async function joinRoom(
   code: string,
   player: { userId: string; handle: string; initial: string }
-): { state: RoomState } | { error: string } {
-  const state = rooms.get(code);
+): Promise<{ state: RoomState } | { error: string }> {
+  const state = await ensureRoom(code);
   if (!state) return { error: "Room not found" };
   const existing = state.players.find((p) => p.userId === player.userId);
   if (existing) return { state };
@@ -314,8 +345,8 @@ export function joinRoom(
   return { state };
 }
 
-export function leaveRoom(code: string, userId: string): void {
-  const state = rooms.get(code);
+export async function leaveRoom(code: string, userId: string): Promise<void> {
+  const state = await ensureRoom(code);
   if (!state) return;
   const idx = state.players.findIndex((p) => p.userId === userId);
   if (idx === -1) return;
@@ -398,11 +429,11 @@ function advanceTurn(state: RoomState): void {
   lightFuse(state);
 }
 
-export function startGame(
+export async function startGame(
   code: string,
   requesterId: string
-): { state: RoomState } | { error: string } {
-  const state = rooms.get(code);
+): Promise<{ state: RoomState } | { error: string }> {
+  const state = await ensureRoom(code);
   if (!state) return { error: "Room not found" };
   if (state.hostId !== requesterId) return { error: "Only host can start" };
   if (state.status !== "waiting") return { error: "Game already started" };
@@ -423,12 +454,12 @@ export function startGame(
   return { state };
 }
 
-export function submitAnswer(
+export async function submitAnswer(
   code: string,
   userId: string,
   payload: AnswerPayload
-): { correct: boolean } | { error: string } {
-  const state = rooms.get(code);
+): Promise<{ correct: boolean } | { error: string }> {
+  const state = await ensureRoom(code);
   if (!state) return { error: "Room not found" };
   if (state.status !== "playing") return { error: "Not playing" };
   if (state.currentPlayerId !== userId) return { error: "Not your turn" };
@@ -493,11 +524,11 @@ export function submitAnswer(
   return { correct };
 }
 
-export function resetRoom(
+export async function resetRoom(
   code: string,
   requesterId: string
-): { state: RoomState } | { error: string } {
-  const state = rooms.get(code);
+): Promise<{ state: RoomState } | { error: string }> {
+  const state = await ensureRoom(code);
   if (!state) return { error: "Room not found" };
   if (state.hostId !== requesterId) return { error: "Only host can reset" };
 

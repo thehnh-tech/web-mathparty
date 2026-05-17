@@ -16,5 +16,5 @@ export interface PublicRoomSummary {
 export async function listPublicRoomsAction(): Promise<PublicRoomSummary[]> {
   const actor = await getCurrentActor();
   if (!actor) return [];
-  return engine.listPublicRooms();
+  return await engine.listPublicRooms();
 }

@@ -29,7 +29,7 @@ export async function joinRoomAction(
 ): Promise<{ ok: true } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return joinRoomForActor(actor, code);
+    return await joinRoomForActor(actor, code);
   } catch (e) {
     console.error("[joinRoomAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };
@@ -41,7 +41,7 @@ export async function leaveRoomAction(
 ): Promise<{ ok: true } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return leaveRoomForActor(actor, code);
+    return await leaveRoomForActor(actor, code);
   } catch (e) {
     console.error("[leaveRoomAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };
@@ -53,7 +53,7 @@ export async function startGameAction(
 ): Promise<{ ok: true } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return startGameForActor(actor, code);
+    return await startGameForActor(actor, code);
   } catch (e) {
     console.error("[startGameAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };
@@ -66,7 +66,7 @@ export async function submitChoiceAction(
 ): Promise<{ ok: true; correct: boolean } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return submitChoiceForActor(actor, code, choiceIdx);
+    return await submitChoiceForActor(actor, code, choiceIdx);
   } catch (e) {
     console.error("[submitChoiceAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };
@@ -79,7 +79,7 @@ export async function submitTextAction(
 ): Promise<{ ok: true; correct: boolean } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return submitTextForActor(actor, code, value);
+    return await submitTextForActor(actor, code, value);
   } catch (e) {
     console.error("[submitTextAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };
@@ -91,7 +91,7 @@ export async function resetRoomAction(
 ): Promise<{ ok: true } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return resetRoomForActor(actor, code);
+    return await resetRoomForActor(actor, code);
   } catch (e) {
     console.error("[resetRoomAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };

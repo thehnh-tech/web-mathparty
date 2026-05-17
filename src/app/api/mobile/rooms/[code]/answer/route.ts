@@ -25,14 +25,14 @@ export async function POST(
     if (typeof body.idx !== "number") {
       return NextResponse.json({ error: "Invalid choice" }, { status: 400 });
     }
-    const result = submitChoiceForActor(actor, code, body.idx);
+    const result = await submitChoiceForActor(actor, code, body.idx);
     if ("error" in result) return NextResponse.json(result, { status: 400 });
     return NextResponse.json(result);
   }
 
   if (body?.kind === "text") {
     const value = typeof body.value === "string" ? body.value : "";
-    const result = submitTextForActor(actor, code, value);
+    const result = await submitTextForActor(actor, code, value);
     if ("error" in result) return NextResponse.json(result, { status: 400 });
     return NextResponse.json(result);
   }

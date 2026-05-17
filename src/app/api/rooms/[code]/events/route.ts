@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getActorFromHeaders } from "@/lib/actor";
 import {
-  getRoom,
+  ensureRoom,
   markAbsent,
   markPresent,
   subscribe,
@@ -35,7 +35,7 @@ export async function GET(
   let presenceMarked = false;
 
   const stream = new ReadableStream<Uint8Array>({
-    start(controller) {
+    async start(controller) {
       const send = (data: unknown) => {
         if (closed) return;
         try {
@@ -45,7 +45,7 @@ export async function GET(
         }
       };
 
-      const initial = getRoom(code);
+      const initial = await ensureRoom(code);
       if (!initial) {
         send({ type: "not_found", code });
         setTimeout(() => {
@@ -65,6 +65,9 @@ export async function GET(
       unsub = subscribe(code, (state: RoomState) => {
         send({ type: "state", state });
       });
+      // Push the initial snapshot we already loaded so the SSE client gets
+      // state even on a Lambda that just rehydrated from the durable store.
+      send({ type: "state", state: initial });
 
       heartbeat = setInterval(() => {
         if (closed) return;

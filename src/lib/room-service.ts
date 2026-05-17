@@ -56,59 +56,59 @@ export function createRoomForActor(
   return { code: state.code };
 }
 
-export function joinRoomForActor(
+export async function joinRoomForActor(
   actor: RequestActor,
   code: string
-): { ok: true } | { error: string } {
-  const result = engine.joinRoom(code.toUpperCase(), actorToPlayer(actor));
+): Promise<{ ok: true } | { error: string }> {
+  const result = await engine.joinRoom(code.toUpperCase(), actorToPlayer(actor));
   if ("error" in result) return { error: result.error };
   return { ok: true };
 }
 
-export function leaveRoomForActor(
+export async function leaveRoomForActor(
   actor: RequestActor,
   code: string
-): { ok: true } {
-  engine.leaveRoom(code.toUpperCase(), actor.id);
+): Promise<{ ok: true }> {
+  await engine.leaveRoom(code.toUpperCase(), actor.id);
   return { ok: true };
 }
 
-export function startGameForActor(
+export async function startGameForActor(
   actor: RequestActor,
   code: string
-): { ok: true } | { error: string } {
-  const result = engine.startGame(code.toUpperCase(), actor.id);
+): Promise<{ ok: true } | { error: string }> {
+  const result = await engine.startGame(code.toUpperCase(), actor.id);
   if ("error" in result) return { error: result.error };
   return { ok: true };
 }
 
-export function submitChoiceForActor(
+export async function submitChoiceForActor(
   actor: RequestActor,
   code: string,
   choiceIdx: number
-): { ok: true; correct: boolean } | { error: string } {
+): Promise<{ ok: true; correct: boolean } | { error: string }> {
   const payload: AnswerPayload = { kind: "choice", idx: choiceIdx };
-  const result = engine.submitAnswer(code.toUpperCase(), actor.id, payload);
+  const result = await engine.submitAnswer(code.toUpperCase(), actor.id, payload);
   if ("error" in result) return { error: result.error };
   return { ok: true, correct: result.correct };
 }
 
-export function submitTextForActor(
+export async function submitTextForActor(
   actor: RequestActor,
   code: string,
   value: string
-): { ok: true; correct: boolean } | { error: string } {
+): Promise<{ ok: true; correct: boolean } | { error: string }> {
   const payload: AnswerPayload = { kind: "text", value };
-  const result = engine.submitAnswer(code.toUpperCase(), actor.id, payload);
+  const result = await engine.submitAnswer(code.toUpperCase(), actor.id, payload);
   if ("error" in result) return { error: result.error };
   return { ok: true, correct: result.correct };
 }
 
-export function resetRoomForActor(
+export async function resetRoomForActor(
   actor: RequestActor,
   code: string
-): { ok: true } | { error: string } {
-  const result = engine.resetRoom(code.toUpperCase(), actor.id);
+): Promise<{ ok: true } | { error: string }> {
+  const result = await engine.resetRoom(code.toUpperCase(), actor.id);
   if ("error" in result) return { error: result.error };
   return { ok: true };
 }

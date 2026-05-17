@@ -12,5 +12,5 @@ export async function POST(
   const actor = await getActorFromHeaders(req.headers);
   if (!actor) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   const { code } = await params;
-  return NextResponse.json(leaveRoomForActor(actor, code));
+  return NextResponse.json(await leaveRoomForActor(actor, code));
 }

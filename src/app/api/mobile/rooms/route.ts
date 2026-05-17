@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function GET(req: NextRequest) {
   const actor = await getActorFromHeaders(req.headers);
   if (!actor) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  return NextResponse.json({ rooms: engine.listPublicRooms() });
+  return NextResponse.json({ rooms: await engine.listPublicRooms() });
 }
 
 export async function POST(req: NextRequest) {

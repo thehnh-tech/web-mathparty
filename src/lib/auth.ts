@@ -77,13 +77,23 @@ export const auth = betterAuth({
     console.log("[magicLink] email:", email);
     console.log("[magicLink] url:", url);
 
+    // Wrap the verify URL in an interstitial. Email security scanners (Outlook
+    // ATP, Gmail safety preview, etc.) routinely GET or HEAD links in emails,
+    // which would otherwise consume the one-time token before the user clicks.
+    // The interstitial requires a real form submission, which scanners skip.
+    const base =
+      process.env.BETTER_AUTH_URL?.replace(/\/+$/, "") ||
+      "http://localhost:3000";
+    const wrapped = `${base}/auth/confirm?to=${encodeURIComponent(url)}`;
+
     await sendEmail(
       email,
       "Your magic link 🔥",
       `<div>
         <h1>Bombatique 💣</h1>
-        <p>Click the link below to sign in.</p>
-        <a href="${url}">Sign in</a>
+        <p>Click the button below to sign in.</p>
+        <p><a href="${wrapped}" style="display:inline-block;padding:10px 16px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">Sign in</a></p>
+        <p style="font-size:12px;color:#666;">Or paste this link into your browser: ${wrapped}</p>
       </div>`
     );
   },

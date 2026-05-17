@@ -12,7 +12,7 @@ export async function POST(
   const actor = await getActorFromHeaders(req.headers);
   if (!actor) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   const { code } = await params;
-  const result = joinRoomForActor(actor, code);
+  const result = await joinRoomForActor(actor, code);
   if ("error" in result) return NextResponse.json(result, { status: 400 });
   return NextResponse.json(result);
 }
