@@ -79,13 +79,89 @@ async function emit(code: string): Promise<void> {
 // so mutations on this lambda operate on the most recently saved state from
 // any lambda. Falls back to the in-memory cache only to cover the small
 // window between createRoom and the first saveRoomSnapshot landing in Mongo.
+//
+// On the way back, lazily applies any time-driven transitions (bomb expired,
+// reveal window finished) so the room moves forward without depending on
+// a setTimeout staying alive on the Vercel lambda that lit it.
 export async function ensureRoom(code: string): Promise<RoomState | undefined> {
   const fresh = await loadRoomSnapshot(code);
   if (fresh) {
     rooms.set(code, fresh);
-    return fresh;
+  }
+  const state = rooms.get(code);
+  if (!state) return undefined;
+
+  if (tickStateInPlace(state)) {
+    // The tick moved the game forward; persist + broadcast.
+    await emit(code);
   }
   return rooms.get(code);
+}
+
+// One-step time-based transition. Idempotent: if there's nothing to do it
+// returns false and mutates nothing. Called on every read so the room
+// progresses as wall-clock time passes, regardless of timer scheduling.
+function tickStateInPlace(state: RoomState): boolean {
+  if (state.status !== "playing") return false;
+  const now = Date.now();
+
+  // Reveal window has ended → advance to the next player.
+  if (
+    state.lastAnswer &&
+    state.revealUntilTs !== null &&
+    now >= state.revealUntilTs
+  ) {
+    advanceTurn(state);
+    return true;
+  }
+
+  // Bomb fuse expired without an answer → trigger explosion.
+  if (
+    !state.lastAnswer &&
+    state.bombExplodeAt !== null &&
+    now >= state.bombExplodeAt
+  ) {
+    applyExplosionInPlace(state);
+    return true;
+  }
+
+  return false;
+}
+
+function applyExplosionInPlace(state: RoomState): void {
+  if (!state.currentQuestion || !state.currentPlayerId) return;
+  const userId = state.currentPlayerId;
+  const q = state.currentQuestion;
+  const now = Date.now();
+  const solveMs =
+    state.currentQuestionStartedAt != null
+      ? Math.max(0, now - state.currentQuestionStartedAt)
+      : 0;
+
+  state.lastAnswer = {
+    userId,
+    raw: "",
+    correct: false,
+    cause: "explosion",
+    ts: now,
+  };
+  state.revealUntilTs = now + REVEAL_MS;
+  state.bombExplodeAt = null;
+  state.history.push({
+    playerId: userId,
+    questionId: q.id,
+    topic: q.topic,
+    raw: "",
+    correct: false,
+    solveMs,
+    ts: now,
+  });
+
+  const player = state.players.find((p) => p.userId === userId);
+  if (player) {
+    player.lives = Math.max(0, player.lives - 1);
+    if (player.lives === 0) player.eliminated = true;
+  }
 }
 
 export function subscribe(
@@ -158,93 +234,16 @@ export function markAbsent(code: string, userId: string): void {
   absenceTimers.set(key, t);
 }
 
-function clearFuse(code: string): void {
-  const t = fuseTimers.get(code);
-  if (t) {
-    clearTimeout(t);
-    fuseTimers.delete(code);
-  }
-}
-
+// Bomb-fuse just records the deadline. The actual "explosion" is computed
+// lazily by tickStateInPlace whenever someone reads the state, which works
+// reliably on serverless even after the originating lambda exits.
 function lightFuse(state: RoomState): void {
-  clearFuse(state.code);
   const delay = BOMB_LOWER_MS + Math.random() * (BOMB_UPPER_MS - BOMB_LOWER_MS);
   state.bombExplodeAt = Date.now() + delay;
-  const t = setTimeout(() => {
-    fuseTimers.delete(state.code);
-    void triggerExplosion(state.code);
-  }, delay);
-  fuseTimers.set(state.code, t);
 }
 
-async function triggerExplosion(code: string): Promise<void> {
-  // The fuse timer fires on whichever instance lit it, but the user's
-  // answer may have landed on a different instance and updated Mongo with
-  // lastAnswer / bombExplodeAt: null. Refresh from the durable store before
-  // mutating so we don't fire a phantom explosion against a stale snapshot.
-  const fresh = await loadRoomSnapshot(code);
-  if (fresh) rooms.set(code, fresh);
-
-  const state = rooms.get(code);
-  if (!state) return;
-  if (state.status !== "playing") return;
-  if (state.lastAnswer) return;
-  if (state.bombExplodeAt === null) return;
-  if (!state.currentQuestion || !state.currentPlayerId) return;
-
-  const userId = state.currentPlayerId;
-  const q = state.currentQuestion;
-  const now = Date.now();
-  const solveMs =
-    state.currentQuestionStartedAt != null
-      ? Math.max(0, now - state.currentQuestionStartedAt)
-      : 0;
-
-  state.lastAnswer = {
-    userId,
-    raw: "",
-    correct: false,
-    cause: "explosion",
-    ts: now,
-  };
-  state.revealUntilTs = now + REVEAL_MS;
-  state.bombExplodeAt = null;
-  state.history.push({
-    playerId: userId,
-    questionId: q.id,
-    topic: q.topic,
-    raw: "",
-    correct: false,
-    solveMs,
-    ts: now,
-  });
-
-  const player = state.players.find((p) => p.userId === userId);
-  if (player) {
-    player.lives = Math.max(0, player.lives - 1);
-    if (player.lives === 0) player.eliminated = true;
-  }
-
-  await emit(code);
-
-  const prevTimer = timers.get(code);
-  if (prevTimer) clearTimeout(prevTimer);
-  const t = setTimeout(() => {
-    timers.delete(code);
-    void scheduleAdvanceTurn(code);
-  }, REVEAL_MS);
-  timers.set(code, t);
-}
-
-async function scheduleAdvanceTurn(code: string): Promise<void> {
-  // Refresh from Mongo so we advance from the latest server-confirmed state,
-  // not whatever stale snapshot this lambda was holding.
-  const fresh = await loadRoomSnapshot(code);
-  if (fresh) rooms.set(code, fresh);
-  const cur = rooms.get(code);
-  if (!cur || cur.status !== "playing") return;
-  advanceTurn(cur);
-  await emit(code);
+function clearFuse(_code: string): void {
+  // Nothing to clear now that the fuse is stored as a deadline on the state.
 }
 
 function generateCode(): string {
@@ -377,10 +376,6 @@ export async function leaveRoom(code: string, userId: string): Promise<void> {
   state.players.splice(idx, 1);
 
   if (state.players.length === 0) {
-    const t = timers.get(code);
-    if (t) clearTimeout(t);
-    timers.delete(code);
-    clearFuse(code);
     rooms.delete(code);
     await emit(code);
     return;
@@ -530,16 +525,9 @@ export async function submitAnswer(
   }
 
   await emit(code);
-
-  // Schedule turn advance after reveal window
-  const prevTimer = timers.get(code);
-  if (prevTimer) clearTimeout(prevTimer);
-  const t = setTimeout(() => {
-    timers.delete(code);
-    void scheduleAdvanceTurn(code);
-  }, REVEAL_MS);
-  timers.set(code, t);
-
+  // The post-reveal advance is handled lazily by tickStateInPlace on the
+  // next read. Serverless lambdas don't keep setTimeouts alive after the
+  // response, so the tick is the only reliable scheduler.
   return { correct };
 }
 

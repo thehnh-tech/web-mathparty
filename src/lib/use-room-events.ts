@@ -7,12 +7,13 @@ import { RoomState } from "./game-types";
 type Status = "connecting" | "open" | "not_found" | "error";
 
 const ROOM_EVENT_NAME = "state";
-// How often to fall back to polling /state when Ably hasn't delivered a
-// message recently. Stays tight so multiplayer feels live even if the Ably
-// push path is misconfigured. Polling is the safety net, not the primary
-// mechanism — when Ably is healthy these requests are mostly no-ops.
-const ACTIVE_POLL_MS = 800;
-const IDLE_POLL_MS = 1500;
+// /state polling drives the turn-by-turn progression: on Vercel the
+// server can't keep setTimeouts alive past a response, so the next-turn
+// advance only happens when someone reads the state. The intervals are
+// tuned for "tour à tour" responsiveness, not just realtime backstop.
+const ACTIVE_POLL_MS = 500;
+const IDLE_POLL_MS = 1000;
+const TRANSITION_BUFFER_MS = 80;
 
 interface RoomStatePayload {
   type: "state";
@@ -123,10 +124,29 @@ export function useRoomEvents(code: string | null) {
       }
     }
 
+    function computeDelay(): number {
+      const cur = stateRef.current;
+      if (!cur || cur.status !== "playing") return IDLE_POLL_MS;
+      const now = Date.now();
+      // Race the deadline: if a transition is due, fetch right after it
+      // so the tour-by-tour change is visible within ~100 ms.
+      const deadlines: number[] = [];
+      if (cur.lastAnswer && cur.revealUntilTs !== null) {
+        deadlines.push(cur.revealUntilTs - now);
+      }
+      if (!cur.lastAnswer && cur.bombExplodeAt !== null) {
+        deadlines.push(cur.bombExplodeAt - now);
+      }
+      const soonest = deadlines.filter((d) => d > -2000).sort((a, b) => a - b)[0];
+      if (soonest !== undefined) {
+        if (soonest <= 0) return TRANSITION_BUFFER_MS;
+        if (soonest < ACTIVE_POLL_MS) return soonest + TRANSITION_BUFFER_MS;
+      }
+      return ACTIVE_POLL_MS;
+    }
+
     function schedulePoll() {
       if (closedRef.current) return;
-      const delay =
-        stateRef.current?.status === "playing" ? ACTIVE_POLL_MS : IDLE_POLL_MS;
       pollTimer = setTimeout(async () => {
         const result = await fetchSnapshot();
         if (closedRef.current) return;
@@ -135,7 +155,7 @@ export function useRoomEvents(code: string | null) {
           return;
         }
         schedulePoll();
-      }, delay);
+      }, computeDelay());
     }
 
     async function start() {
