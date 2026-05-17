@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     chapterId?: string;
     roomType?: RoomType;
   } | null;
-  const result = createRoomForActor(
+  const result = await createRoomForActor(
     actor,
     body?.chapterId ?? "all",
     body?.roomType ?? "public"

@@ -36,17 +36,17 @@ function actorToPlayer(actor: RequestActor) {
   };
 }
 
-export function createRoomForActor(
+export async function createRoomForActor(
   actor: RequestActor,
   chapterId: string,
   roomType: RoomType = "public"
-): { code: string } | { error: string } {
+): Promise<{ code: string } | { error: string }> {
   if (!isValidChapterId(chapterId)) return { error: "Invalid chapter" };
   if (roomType !== "public" && roomType !== "private") return { error: "Invalid room type" };
   if (!rateLimitCreate(actor.id)) return { error: "Too many rooms - slow down a bit." };
 
   const p = actorToPlayer(actor);
-  const state = engine.createRoom({
+  const state = await engine.createRoom({
     hostId: p.userId,
     hostHandle: p.handle,
     hostInitial: p.initial,

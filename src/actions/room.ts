@@ -18,7 +18,7 @@ export async function createRoomAction(
 ): Promise<{ code: string } | { error: string }> {
   try {
     const actor = await requireCurrentActor();
-    return createRoomForActor(actor, chapterId, roomType);
+    return await createRoomForActor(actor, chapterId, roomType);
   } catch (e) {
     console.error("[createRoomAction]", e);
     return { error: e instanceof Error ? e.message : String(e) };

@@ -42,15 +42,33 @@ export async function createRealtimeTokenRequest(actor: {
   });
 }
 
+let warnedAblyMissing = false;
+
 export async function publishRoomState(
   code: string,
   state: RoomState
 ): Promise<void> {
-  if (!isAblyConfigured()) return;
-  const snapshot = JSON.parse(JSON.stringify(state)) as RoomState;
-  const channel = getRestClient().channels.get(roomChannelName(code));
-  await channel.publish(ROOM_EVENT_NAME, {
-    type: ROOM_EVENT_NAME,
-    state: snapshot,
-  });
+  if (!isAblyConfigured()) {
+    if (!warnedAblyMissing) {
+      warnedAblyMissing = true;
+      console.error(
+        "[ably] ABLY_API_KEY is not set on this runtime. Room state updates " +
+          "will NOT be pushed to clients. Set the env var on Vercel and redeploy."
+      );
+    }
+    return;
+  }
+  try {
+    const snapshot = JSON.parse(JSON.stringify(state)) as RoomState;
+    const channel = getRestClient().channels.get(roomChannelName(code));
+    await channel.publish(ROOM_EVENT_NAME, {
+      type: ROOM_EVENT_NAME,
+      state: snapshot,
+    });
+  } catch (err) {
+    // Surface publish failures so they show up in Vercel logs instead of
+    // being silently swallowed by the .catch in emit().
+    console.error("[ably:publish]", code, err);
+    throw err;
+  }
 }

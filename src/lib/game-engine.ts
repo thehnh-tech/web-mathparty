@@ -49,15 +49,21 @@ global._bombPresence = presence;
 global._bombAbsenceTimers = absenceTimers;
 global._bombFuseTimers = fuseTimers;
 
-function emit(code: string) {
+async function emit(code: string): Promise<void> {
   const state = rooms.get(code);
   if (!state) {
     // Room was just deleted — propagate that to the durable store too.
-    void deleteRoomSnapshot(code).catch(() => {});
+    await deleteRoomSnapshot(code);
     return;
   }
-  void publishRoomState(code, state).catch(() => {});
-  void saveRoomSnapshot(state).catch(() => {});
+  // Save before returning so /state polls that follow this mutation never
+  // see the pre-mutation snapshot in Mongo and clobber the freshly applied
+  // state on the client.
+  await saveRoomSnapshot(state);
+  // Realtime push is best-effort — the snapshot is already durable.
+  void publishRoomState(code, state).catch((err) => {
+    console.error("[ably:publish failed]", code, err);
+  });
   const set = listeners.get(code);
   if (!set) return;
   for (const l of set) {
@@ -69,17 +75,17 @@ function emit(code: string) {
   }
 }
 
-// Look up a room across instances. Prefers the in-memory cache; falls back to
-// the durable snapshot persisted on every emit. This keeps room state usable
-// even when Vercel routes the request to a Lambda that has not seen the room
-// yet (the original in-memory-only design lost the room in that case).
+// Look up a room across instances. Always tries the durable snapshot first
+// so mutations on this lambda operate on the most recently saved state from
+// any lambda. Falls back to the in-memory cache only to cover the small
+// window between createRoom and the first saveRoomSnapshot landing in Mongo.
 export async function ensureRoom(code: string): Promise<RoomState | undefined> {
-  const cached = rooms.get(code);
-  if (cached) return cached;
-  const loaded = await loadRoomSnapshot(code);
-  if (!loaded) return undefined;
-  rooms.set(code, loaded);
-  return loaded;
+  const fresh = await loadRoomSnapshot(code);
+  if (fresh) {
+    rooms.set(code, fresh);
+    return fresh;
+  }
+  return rooms.get(code);
 }
 
 export function subscribe(
@@ -166,16 +172,24 @@ function lightFuse(state: RoomState): void {
   state.bombExplodeAt = Date.now() + delay;
   const t = setTimeout(() => {
     fuseTimers.delete(state.code);
-    triggerExplosion(state.code);
+    void triggerExplosion(state.code);
   }, delay);
   fuseTimers.set(state.code, t);
 }
 
-function triggerExplosion(code: string): void {
+async function triggerExplosion(code: string): Promise<void> {
+  // The fuse timer fires on whichever instance lit it, but the user's
+  // answer may have landed on a different instance and updated Mongo with
+  // lastAnswer / bombExplodeAt: null. Refresh from the durable store before
+  // mutating so we don't fire a phantom explosion against a stale snapshot.
+  const fresh = await loadRoomSnapshot(code);
+  if (fresh) rooms.set(code, fresh);
+
   const state = rooms.get(code);
   if (!state) return;
   if (state.status !== "playing") return;
   if (state.lastAnswer) return;
+  if (state.bombExplodeAt === null) return;
   if (!state.currentQuestion || !state.currentPlayerId) return;
 
   const userId = state.currentPlayerId;
@@ -211,18 +225,26 @@ function triggerExplosion(code: string): void {
     if (player.lives === 0) player.eliminated = true;
   }
 
-  emit(code);
+  await emit(code);
 
   const prevTimer = timers.get(code);
   if (prevTimer) clearTimeout(prevTimer);
   const t = setTimeout(() => {
     timers.delete(code);
-    const cur = rooms.get(code);
-    if (!cur || cur.status !== "playing") return;
-    advanceTurn(cur);
-    emit(code);
+    void scheduleAdvanceTurn(code);
   }, REVEAL_MS);
   timers.set(code, t);
+}
+
+async function scheduleAdvanceTurn(code: string): Promise<void> {
+  // Refresh from Mongo so we advance from the latest server-confirmed state,
+  // not whatever stale snapshot this lambda was holding.
+  const fresh = await loadRoomSnapshot(code);
+  if (fresh) rooms.set(code, fresh);
+  const cur = rooms.get(code);
+  if (!cur || cur.status !== "playing") return;
+  advanceTurn(cur);
+  await emit(code);
 }
 
 function generateCode(): string {
@@ -237,13 +259,13 @@ function generateCode(): string {
   return code;
 }
 
-export function createRoom(opts: {
+export async function createRoom(opts: {
   hostId: string;
   hostHandle: string;
   hostInitial: string;
   chapterId: ChapterId;
   roomType: RoomType;
-}): RoomState {
+}): Promise<RoomState> {
   const code = generateCode();
   const host: Player = {
     userId: opts.hostId,
@@ -277,7 +299,7 @@ export function createRoom(opts: {
     history: [],
   };
   rooms.set(code, state);
-  emit(code);
+  await emit(code);
   return state;
 }
 
@@ -341,7 +363,7 @@ export async function joinRoom(
     eliminated: false,
     isHost: false,
   });
-  emit(code);
+  await emit(code);
   return { state };
 }
 
@@ -360,7 +382,7 @@ export async function leaveRoom(code: string, userId: string): Promise<void> {
     timers.delete(code);
     clearFuse(code);
     rooms.delete(code);
-    emit(code);
+    await emit(code);
     return;
   }
 
@@ -385,7 +407,7 @@ export async function leaveRoom(code: string, userId: string): Promise<void> {
     }
   }
 
-  emit(code);
+  await emit(code);
 }
 
 function advanceTurn(state: RoomState): void {
@@ -450,7 +472,7 @@ export async function startGame(
   state.history = [];
   state.persisted = false;
   lightFuse(state);
-  emit(code);
+  await emit(code);
   return { state };
 }
 
@@ -507,17 +529,14 @@ export async function submitAnswer(
     }
   }
 
-  emit(code);
+  await emit(code);
 
   // Schedule turn advance after reveal window
   const prevTimer = timers.get(code);
   if (prevTimer) clearTimeout(prevTimer);
   const t = setTimeout(() => {
     timers.delete(code);
-    const cur = rooms.get(code);
-    if (!cur || cur.status !== "playing") return;
-    advanceTurn(cur);
-    emit(code);
+    void scheduleAdvanceTurn(code);
   }, REVEAL_MS);
   timers.set(code, t);
 
@@ -549,6 +568,6 @@ export async function resetRoom(
     p.lives = state.maxLives;
     p.eliminated = false;
   }
-  emit(code);
+  await emit(code);
   return { state };
 }
